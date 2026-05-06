@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { supabase } from "../src/lib/supabase";
 
 const materialIconPaths = {
   add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
@@ -37,57 +38,23 @@ function MaterialIcon({
   );
 }
 
-export default function Home() {
-  const movies: Array<{
-    title: string;
-    date: string;
-    platform: string;
-    rating: MovieRating;
-    poster: string;
-  }> = [
-    {
-      title: "After Hours",
-      date: "May 2, 2026",
-      platform: "MUBI",
-      rating: "liked",
-      poster: "/posters/after-hours.svg",
-    },
-    {
-      title: "Perfect Days",
-      date: "Apr 29, 2026",
-      platform: "Cinema",
-      rating: "liked",
-      poster: "/posters/perfect-days.svg",
-    },
-    {
-      title: "The Apartment",
-      date: "Apr 24, 2026",
-      platform: "Criterion",
-      rating: "okay",
-      poster: "/posters/the-apartment.svg",
-    },
-    {
-      title: "Decision to Leave",
-      date: "Apr 19, 2026",
-      platform: "Apple TV",
-      rating: "liked",
-      poster: "/posters/decision-to-leave.svg",
-    },
-    {
-      title: "Solaris",
-      date: "Apr 13, 2026",
-      platform: "Kanopy",
-      rating: "okay",
-      poster: "/posters/solaris.svg",
-    },
-    {
-      title: "The Killer",
-      date: "Apr 8, 2026",
-      platform: "Netflix",
-      rating: "disliked",
-      poster: "/posters/the-killer.svg",
-    },
-  ];
+export default async function Home() {
+  const { data, error } = await supabase
+    .from("movies")
+    .select("title, poster_url")
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Supabase error fetching movies:", error);
+  }
+
+  const movies = (data ?? []).map((row: any) => ({
+    title: row.title ?? "",
+    date: "",
+    platform: "",
+    rating: "okay" as MovieRating,
+    poster: row.poster_url ?? "",
+  }));
 
   const ratingIcons: Record<MovieRating, MaterialIconName> = {
     liked: "thumb_up",
@@ -113,50 +80,57 @@ export default function Home() {
 
           <section className="mt-11">
             <div className="space-y-8">
-              {movies.map((movie, index) => (
-                <article
-                  key={`${movie.title}-${movie.date}`}
-                  className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4"
-                >
-                  <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
-                    <Image
-                      src={movie.poster}
-                      alt={`${movie.title} poster`}
-                      fill
-                      sizes="60px"
-                      loading={index < 3 ? "eager" : "lazy"}
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="min-w-0">
-                    <h2 className="min-w-0 text-[20px] font-extrabold leading-[26px]">
-                      {movie.title}
-                    </h2>
-
-                    <div className="mt-3 flex items-center justify-between gap-4">
-                      <dl className="flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-[14px] font-medium leading-5 text-black/55">
-                        <dt className="sr-only">Watched on</dt>
-                        <dd>{movie.date}</dd>
-                        <dt className="sr-only">Platform</dt>
-                        <dd aria-hidden="true">/</dd>
-                        <dd>{movie.platform}</dd>
-                      </dl>
-
-                      <span
-                        aria-label={ratingLabels[movie.rating]}
-                        className="flex h-5 w-5 shrink-0 items-center justify-center text-black/45"
-                        role="img"
-                      >
-                        <MaterialIcon
-                          name={ratingIcons[movie.rating]}
-                          className="h-[17px] w-[17px]"
-                        />
-                      </span>
+              {movies.length === 0 ? (
+                <div className="py-12 text-center text-[16px] text-black/55">
+                  No movies yet
+                </div>
+              ) : (
+                movies.map((movie, index) => (
+                  <article
+                    key={`${movie.title}-${movie.date}-${index}`}
+                    className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4"
+                  >
+                    <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
+                      <Image
+                        src={movie.poster}
+                        alt={`${movie.title} poster`}
+                        fill
+                        sizes="60px"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        className="object-cover"
+                        unoptimized
+                      />
                     </div>
-                  </div>
-                </article>
-              ))}
+
+                    <div className="min-w-0">
+                      <h2 className="min-w-0 text-[20px] font-extrabold leading-[26px]">
+                        {movie.title}
+                      </h2>
+
+                      <div className="mt-3 flex items-center justify-between gap-4">
+                        <dl className="flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-[14px] font-medium leading-5 text-black/55">
+                          <dt className="sr-only">Watched on</dt>
+                          <dd>{movie.date}</dd>
+                          <dt className="sr-only">Platform</dt>
+                          <dd aria-hidden="true">/</dd>
+                          <dd>{movie.platform}</dd>
+                        </dl>
+
+                        <span
+                          aria-label={ratingLabels[movie.rating]}
+                          className="flex h-5 w-5 shrink-0 items-center justify-center text-black/45"
+                          role="img"
+                        >
+                          <MaterialIcon
+                            name={ratingIcons[movie.rating]}
+                            className="h-[17px] w-[17px]"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
           </section>
         </div>
