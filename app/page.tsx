@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "../src/lib/supabase";
@@ -18,6 +19,34 @@ const materialIconPaths = {
 
 type MaterialIconName = keyof typeof materialIconPaths;
 type MovieRating = "liked" | "okay" | "disliked";
+type MovieMetadataItem = {
+  label: string;
+  value: string;
+};
+
+type MovieRow = {
+  title: string | null;
+  poster_url: string | null;
+  watched_date: string | null;
+  platform: string | null;
+};
+
+function getMetadataValue(value: string | null | undefined) {
+  const trimmedValue = value?.trim();
+
+  return trimmedValue ? trimmedValue : null;
+}
+
+function getMovieMetadata(row: MovieRow): MovieMetadataItem[] {
+  const watchedDate = getMetadataValue(row.watched_date);
+  const platform = getMetadataValue(row.platform);
+  const metadata = [
+    watchedDate ? { label: "Watched on", value: watchedDate } : null,
+    platform ? { label: "Platform", value: platform } : null,
+  ].filter((item): item is MovieMetadataItem => item !== null);
+
+  return metadata.length > 0 ? metadata : [{ label: "Metadata", value: "null" }];
+}
 
 function MaterialIcon({
   name,
@@ -41,17 +70,16 @@ function MaterialIcon({
 export default async function Home() {
   const { data, error } = await supabase
     .from("movies")
-    .select("title, poster_url")
+    .select("title, poster_url, watched_date, platform")
     .order("id", { ascending: false });
 
   if (error) {
     console.error("Supabase error fetching movies:", error);
   }
 
-  const movies = (data ?? []).map((row: any) => ({
+  const movies = ((data ?? []) as MovieRow[]).map((row) => ({
     title: row.title ?? "",
-    date: "",
-    platform: "",
+    metadata: getMovieMetadata(row),
     rating: "okay" as MovieRating,
     poster: row.poster_url ?? "",
   }));
@@ -87,7 +115,7 @@ export default async function Home() {
               ) : (
                 movies.map((movie, index) => (
                   <article
-                    key={`${movie.title}-${movie.date}-${index}`}
+                    key={`${movie.title}-${index}`}
                     className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4"
                   >
                     <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
@@ -98,7 +126,6 @@ export default async function Home() {
                         sizes="60px"
                         loading={index < 3 ? "eager" : "lazy"}
                         className="object-cover"
-                        unoptimized
                       />
                     </div>
 
@@ -109,11 +136,15 @@ export default async function Home() {
 
                       <div className="mt-3 flex items-center justify-between gap-4">
                         <dl className="flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-[14px] font-medium leading-5 text-black/55">
-                          <dt className="sr-only">Watched on</dt>
-                          <dd>{movie.date}</dd>
-                          <dt className="sr-only">Platform</dt>
-                          <dd aria-hidden="true">/</dd>
-                          <dd>{movie.platform}</dd>
+                          {movie.metadata.map((item, metadataIndex) => (
+                            <Fragment key={item.label}>
+                              {metadataIndex > 0 ? (
+                                <dd aria-hidden="true">/</dd>
+                              ) : null}
+                              <dt className="sr-only">{item.label}</dt>
+                              <dd>{item.value}</dd>
+                            </Fragment>
+                          ))}
                         </dl>
 
                         <span
