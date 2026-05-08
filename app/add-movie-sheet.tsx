@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
@@ -17,11 +17,22 @@ type MovieSearchResult = {
 type SearchState = "idle" | "loading" | "success" | "error";
 type SaveState = "idle" | "saving";
 
+const SHEET_TRANSITION_MS = 320;
+
 const ratingOptions: { value: MovieRating; label: string }[] = [
   { value: "liked", label: "Liked" },
   { value: "okay", label: "Okay" },
   { value: "disliked", label: "Disliked" },
 ];
+
+function getTodayDate() {
+  const today = new Date();
+  const localToday = new Date(
+    today.getTime() - today.getTimezoneOffset() * 60_000
+  );
+
+  return localToday.toISOString().slice(0, 10);
+}
 
 function getReleaseYearLabel(releaseYear: number | null) {
   return releaseYear === null ? "null" : String(releaseYear);
@@ -29,7 +40,8 @@ function getReleaseYearLabel(releaseYear: number | null) {
 
 export function AddMovieSheet() {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSheetMounted, setIsSheetMounted] = useState(false);
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MovieSearchResult[]>([]);
   const [searchState, setSearchState] = useState<SearchState>("idle");
@@ -37,16 +49,44 @@ export function AddMovieSheet() {
   const [selectedMovie, setSelectedMovie] = useState<MovieSearchResult | null>(
     null
   );
-  const [watchedDate, setWatchedDate] = useState("");
+  const [watchedDate, setWatchedDate] = useState(getTodayDate);
   const [platform, setPlatform] = useState("");
   const [rating, setRating] = useState<MovieRating>("okay");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const openFrameRef = useRef<number | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+
+      if (openFrameRef.current !== null) {
+        window.cancelAnimationFrame(openFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isSheetMounted) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isSheetMounted]);
 
   useEffect(() => {
     const trimmedQuery = query.trim();
 
-    if (!isOpen || selectedMovie || trimmedQuery.length < 2) {
+    if (!isSheetVisible || selectedMovie || trimmedQuery.length < 2) {
       return;
     }
 
@@ -86,10 +126,32 @@ export function AddMovieSheet() {
       controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen, query, selectedMovie]);
+  }, [isSheetVisible, query, selectedMovie]);
+
+  function clearAnimationTimers() {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+
+    if (openFrameRef.current !== null) {
+      window.cancelAnimationFrame(openFrameRef.current);
+      openFrameRef.current = null;
+    }
+  }
 
   function openSheet() {
-    setIsOpen(true);
+    clearAnimationTimers();
+    resetFlow();
+    setIsSheetMounted(true);
+
+    openFrameRef.current = window.requestAnimationFrame(() => {
+      openFrameRef.current = window.requestAnimationFrame(() => {
+        setIsSheetVisible(true);
+        searchInputRef.current?.focus();
+        openFrameRef.current = null;
+      });
+    });
   }
 
   function resetFlow() {
@@ -98,7 +160,7 @@ export function AddMovieSheet() {
     setSearchState("idle");
     setSearchError(null);
     setSelectedMovie(null);
-    setWatchedDate("");
+    setWatchedDate(getTodayDate());
     setPlatform("");
     setRating("okay");
     setSaveState("idle");
@@ -106,26 +168,42 @@ export function AddMovieSheet() {
   }
 
   function closeSheet() {
-    setIsOpen(false);
-    resetFlow();
+    clearAnimationTimers();
+    setIsSheetVisible(false);
+
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsSheetMounted(false);
+      resetFlow();
+      closeTimeoutRef.current = null;
+    }, SHEET_TRANSITION_MS);
   }
 
   function returnToSearch() {
     setSelectedMovie(null);
-    setWatchedDate("");
+    setWatchedDate(getTodayDate());
     setPlatform("");
     setRating("okay");
     setSaveError(null);
   }
 
+  function selectMovie(movie: MovieSearchResult) {
+    setSelectedMovie(movie);
+    setWatchedDate((currentDate) => currentDate || getTodayDate());
+    setSaveError(null);
+  }
+
   function updateQuery(value: string) {
     setQuery(value);
+    setSearchError(null);
 
     if (value.trim().length < 2) {
       setResults([]);
       setSearchError(null);
       setSearchState("idle");
+      return;
     }
+
+    setSearchState("loading");
   }
 
   async function saveWatchedEntry(event: FormEvent<HTMLFormElement>) {
@@ -177,28 +255,32 @@ export function AddMovieSheet() {
         <button
           type="button"
           aria-label="Add movie"
-          aria-expanded={isOpen}
+          aria-expanded={isSheetMounted && isSheetVisible}
           aria-haspopup="dialog"
-          className="ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+          className="ml-auto flex h-14 w-14 touch-manipulation items-center justify-center rounded-full bg-accent text-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
           onClick={openSheet}
         >
           <MaterialIcon name="add" className="h-9 w-9" />
         </button>
       </div>
 
-      {isOpen ? (
-        <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20">
+      {isSheetMounted ? (
+        <div
+          className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20"
+          data-state={isSheetVisible ? "open" : "closed"}
+        >
           <button
             type="button"
             aria-label="Close add movie"
-            className="absolute inset-0 cursor-default"
+            className="absolute inset-0 cursor-default touch-manipulation"
             onClick={closeSheet}
           />
 
           <section
             aria-labelledby="add-movie-title"
             aria-modal="true"
-            className="sheet-panel relative z-10 flex h-[calc(100dvh-16px)] max-h-[calc(100dvh-16px)] w-full max-w-[480px] flex-col rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+            className="sheet-panel relative z-10 flex w-full max-w-[480px] flex-col rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+            data-state={isSheetVisible ? "open" : "closed"}
             role="dialog"
           >
             <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
@@ -349,7 +431,7 @@ export function AddMovieSheet() {
                       id="movie-search"
                       type="search"
                       value={query}
-                      autoFocus
+                      ref={searchInputRef}
                       className="min-w-0 flex-1 bg-transparent text-[16px] font-semibold outline-none placeholder:text-black/30"
                       placeholder="Search"
                       onChange={(event) => updateQuery(event.target.value)}
@@ -383,7 +465,7 @@ export function AddMovieSheet() {
                         key={movie.tmdb_id}
                         type="button"
                         className="grid w-full grid-cols-[44px_minmax(0,1fr)] items-center gap-3 rounded-md py-2 text-left"
-                        onClick={() => setSelectedMovie(movie)}
+                        onClick={() => selectMovie(movie)}
                       >
                         <div className="relative h-[66px] w-[44px] overflow-hidden rounded-sm bg-wrapper">
                           {movie.poster_url ? (

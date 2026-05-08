@@ -1,12 +1,8 @@
-import { Fragment } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import {
-  MaterialIcon,
-  type MaterialIconName,
-} from "@/src/components/material-icon";
+import { MaterialIcon } from "@/src/components/material-icon";
 import { supabase } from "../src/lib/supabase";
 import { AddMovieSheet } from "./add-movie-sheet";
+import { HistoryList, type HistoryMovie } from "./history-list";
 
 export const dynamic = "force-dynamic";
 
@@ -29,14 +25,6 @@ type WatchedEntryRow = {
   platform: string | null;
   rating: string | null;
   movies: MovieRow | MovieRow[] | null;
-};
-
-type HistoryMovie = {
-  id: string;
-  title: string;
-  metadata: MovieMetadataItem[];
-  rating: MovieRating;
-  poster: string | null;
 };
 
 function getMetadataValue(value: string | null | undefined) {
@@ -112,16 +100,21 @@ export default async function Home() {
 
   const entryMovies: HistoryMovie[] = watchedEntries.map((entry) => {
     const movie = getEntryMovie(entry.movies);
+    const watchedDate = getMetadataValue(entry.watched_date);
+    const platform = getMetadataValue(entry.platform);
 
     return {
       id: entry.id,
+      watchedEntryId: entry.id,
       title: movie?.title ?? "Untitled",
       metadata: getMovieMetadata({
-        watchedDate: entry.watched_date,
-        platform: entry.platform,
+        watchedDate,
+        platform,
       }),
       rating: getMovieRating(entry.rating),
       poster: getMetadataValue(movie?.poster_url),
+      watchedDate,
+      platform,
     };
   });
 
@@ -129,25 +122,16 @@ export default async function Home() {
     .filter((movie) => !watchedMovieIds.has(movie.id))
     .map((movie) => ({
       id: `movie-${movie.id}`,
+      watchedEntryId: null,
       title: movie.title ?? "Untitled",
       metadata: getMovieMetadata({}),
       rating: "okay",
       poster: getMetadataValue(movie.poster_url),
+      watchedDate: null,
+      platform: null,
     }));
 
   const movies = [...entryMovies, ...legacyMovies];
-
-  const ratingIcons: Record<MovieRating, MaterialIconName> = {
-    liked: "thumb_up",
-    okay: "sentiment_neutral",
-    disliked: "thumb_down",
-  };
-
-  const ratingLabels: Record<MovieRating, string> = {
-    liked: "Liked",
-    okay: "Okay",
-    disliked: "Disliked",
-  };
 
   return (
     <>
@@ -160,64 +144,7 @@ export default async function Home() {
           </header>
 
           <section className="mt-11">
-            <div className="space-y-8">
-              {movies.length === 0 ? (
-                <div className="py-12 text-center text-[16px] text-black/55">
-                  No movies yet
-                </div>
-              ) : (
-                movies.map((movie, index) => (
-                  <article
-                    key={movie.id}
-                    className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4"
-                  >
-                    <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
-                      {movie.poster ? (
-                        <Image
-                          src={movie.poster}
-                          alt={`${movie.title} poster`}
-                          fill
-                          sizes="60px"
-                          loading={index < 3 ? "eager" : "lazy"}
-                          className="object-cover"
-                        />
-                      ) : null}
-                    </div>
-
-                    <div className="min-w-0">
-                      <h2 className="min-w-0 text-[20px] font-extrabold leading-[26px]">
-                        {movie.title}
-                      </h2>
-
-                      <div className="mt-3 flex items-center justify-between gap-4">
-                        <dl className="flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-[14px] font-medium leading-5 text-black/55">
-                          {movie.metadata.map((item, metadataIndex) => (
-                            <Fragment key={item.label}>
-                              {metadataIndex > 0 ? (
-                                <dd aria-hidden="true">/</dd>
-                              ) : null}
-                              <dt className="sr-only">{item.label}</dt>
-                              <dd>{item.value}</dd>
-                            </Fragment>
-                          ))}
-                        </dl>
-
-                        <span
-                          aria-label={ratingLabels[movie.rating]}
-                          className="flex h-5 w-5 shrink-0 items-center justify-center text-black/45"
-                          role="img"
-                        >
-                          <MaterialIcon
-                            name={ratingIcons[movie.rating]}
-                            className="h-[17px] w-[17px]"
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
+            <HistoryList movies={movies} />
           </section>
         </div>
       </main>
