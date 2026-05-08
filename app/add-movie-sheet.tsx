@@ -187,7 +187,7 @@ export function AddMovieSheet() {
       </div>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/20">
+        <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20">
           <button
             type="button"
             aria-label="Close add movie"
@@ -198,7 +198,7 @@ export function AddMovieSheet() {
           <section
             aria-labelledby="add-movie-title"
             aria-modal="true"
-            className="relative z-10 w-full max-w-[480px] rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+            className="sheet-panel relative z-10 flex h-[calc(100dvh-16px)] max-h-[calc(100dvh-16px)] w-full max-w-[480px] flex-col rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
             role="dialog"
           >
             <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
@@ -234,7 +234,7 @@ export function AddMovieSheet() {
               </button>
             </div>
 
-            <div className="max-h-[74dvh] overflow-y-auto pb-2">
+            <div className="min-h-0 flex-1 overflow-y-auto pb-2">
               {selectedMovie ? (
                 <form className="mt-6" onSubmit={saveWatchedEntry}>
                   <div className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
