@@ -6,7 +6,7 @@ import { HistoryList, type HistoryMovie } from "./history-list";
 
 export const dynamic = "force-dynamic";
 
-type MovieRating = "liked" | "okay" | "disliked";
+type MovieRating = "liked" | "neutral" | "disliked";
 type MovieMetadataItem = {
   label: string;
   value: string;
@@ -61,9 +61,9 @@ function getEntryMovie(movie: WatchedEntryRow["movies"]) {
 }
 
 function getMovieRating(value: string | null): MovieRating {
-  return value === "liked" || value === "disliked" || value === "okay"
+  return value === "liked" || value === "disliked" || value === "neutral"
     ? value
-    : "okay";
+    : "neutral";
 }
 
 export default async function Home() {
@@ -125,7 +125,7 @@ export default async function Home() {
       watchedEntryId: null,
       title: movie.title ?? "Untitled",
       metadata: getMovieMetadata({}),
-      rating: "okay",
+      rating: "neutral",
       poster: getMetadataValue(movie.poster_url),
       watchedDate: null,
       platform: null,

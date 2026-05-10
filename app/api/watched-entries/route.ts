@@ -1,6 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
 
-type MovieRating = "liked" | "okay" | "disliked";
+type MovieRating = "liked" | "neutral" | "disliked";
 
 type SaveWatchedEntryRequest = {
   tmdb_id?: unknown;
@@ -16,7 +16,7 @@ type MovieRecord = {
   id: string;
 };
 
-const validRatings = new Set<MovieRating>(["liked", "okay", "disliked"]);
+const validRatings = new Set<MovieRating>(["liked", "neutral", "disliked"]);
 
 function getOptionalText(value: unknown) {
   if (typeof value !== "string") {
@@ -29,9 +29,13 @@ function getOptionalText(value: unknown) {
 }
 
 function getMovieRating(value: unknown): MovieRating {
+  if (value === "okay") {
+    return "neutral";
+  }
+
   return typeof value === "string" && validRatings.has(value as MovieRating)
     ? (value as MovieRating)
-    : "okay";
+    : "neutral";
 }
 
 function getReleaseYear(value: unknown) {

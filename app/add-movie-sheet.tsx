@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
 
-type MovieRating = "liked" | "okay" | "disliked";
+type MovieRating = "liked" | "neutral" | "disliked";
 
 type MovieSearchResult = {
   tmdb_id: number;
@@ -21,7 +21,7 @@ const SHEET_TRANSITION_MS = 320;
 
 const ratingOptions: { value: MovieRating; label: string }[] = [
   { value: "liked", label: "Liked" },
-  { value: "okay", label: "Okay" },
+  { value: "neutral", label: "Okay" },
   { value: "disliked", label: "Disliked" },
 ];
 
@@ -51,7 +51,7 @@ export function AddMovieSheet() {
   );
   const [watchedDate, setWatchedDate] = useState(getTodayDate);
   const [platform, setPlatform] = useState("");
-  const [rating, setRating] = useState<MovieRating>("okay");
+  const [rating, setRating] = useState<MovieRating>("neutral");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const closeTimeoutRef = useRef<number | null>(null);
@@ -162,7 +162,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("okay");
+    setRating("neutral");
     setSaveState("idle");
     setSaveError(null);
   }
@@ -182,7 +182,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("okay");
+    setRating("neutral");
     setSaveError(null);
   }
 
