@@ -68,12 +68,12 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   }
 
   return (
-    <>
+    <div className="relative col-start-1 row-start-1 h-full w-full overflow-hidden">
       <div
         ref={sliderRef}
         aria-label="Movie images"
         aria-roledescription="carousel"
-        className="absolute inset-0 z-0 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onScroll={(event) => updateActiveImage(event.currentTarget)}
         onKeyDown={handleKeyDown}
         role="region"
@@ -105,6 +105,6 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
           {activeIndex + 1} / {images.length}
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

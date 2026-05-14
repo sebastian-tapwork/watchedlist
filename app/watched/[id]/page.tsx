@@ -1,9 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  MaterialIcon,
-  type MaterialIconName,
-} from "@/src/components/material-icon";
+import { MaterialIcon } from "@/src/components/material-icon";
 import { supabase } from "@/src/lib/supabase";
 import { EditWatchedEntryAction } from "./edit-action";
 import { HeroImageSlider } from "./hero-image-slider";
@@ -17,6 +14,11 @@ export const dynamic = "force-dynamic";
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TMDB_BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780";
+const MOVIE_KEYWORD_LIMIT = 5;
+const WATCHED_ENTRY_SELECT_WITH_WORDS =
+  "id, watched_date, platform, rating, words, movies(id, tmdb_id, title, poster_url, release_year)";
+const WATCHED_ENTRY_SELECT =
+  "id, watched_date, platform, rating, movies(id, tmdb_id, title, poster_url, release_year)";
 
 type MovieRow = {
   id: string;
@@ -36,11 +38,16 @@ type WatchedEntryRow = {
   watched_date: string | null;
   platform: string | null;
   rating: string | null;
+  words?: string | null;
   movies: MovieRow | MovieRow[] | null;
 };
 
 type TmdbImageResult = {
   file_path?: string | null;
+};
+
+type TmdbKeywordResult = {
+  name?: string | null;
 };
 
 function getEntryMovie(movie: WatchedEntryRow["movies"]) {
@@ -59,21 +66,6 @@ function getDisplayValue(value: string | number | null | undefined) {
   return value?.trim() ? value : "null";
 }
 
-function getWatchedMetadata({
-  watchedDate,
-  platform,
-}: {
-  watchedDate: string | null;
-  platform: string | null;
-}) {
-  const metadata = [
-    watchedDate ? { label: "Watched", value: watchedDate } : null,
-    platform ? { label: "Where", value: platform } : null,
-  ].filter((item): item is MetadataItem => item !== null);
-
-  return metadata.length > 0 ? metadata : [{ label: "Metadata", value: "null" }];
-}
-
 function getMovieRating(value: string | null): MovieRating {
   return value === "liked" || value === "disliked" || value === "neutral"
     ? value
@@ -86,14 +78,37 @@ const ratingLabels: Record<MovieRating, string> = {
   disliked: "Disliked",
 };
 
-const ratingIcons: Record<MovieRating, MaterialIconName> = {
-  liked: "thumb_up",
-  neutral: "sentiment_neutral",
-  disliked: "thumb_down",
-};
-
 function isBearerToken(apiKey: string) {
   return apiKey.split(".").length === 3;
+}
+
+function isMissingWordsColumnError(error: { code?: string; message?: string }) {
+  return (
+    error.code === "42703" &&
+    Boolean(
+      error.message?.includes("watched_entries.words") ||
+        error.message?.includes("words")
+    )
+  );
+}
+
+function getWatchedMetadata({
+  watchedDate,
+  platform,
+  rating,
+  words,
+}: {
+  watchedDate: string | null;
+  platform: string | null;
+  rating: MovieRating;
+  words: string | null;
+}) {
+  return [
+    watchedDate ? { label: "Watched", value: watchedDate } : null,
+    platform ? { label: "Where", value: platform } : null,
+    { label: "Rating", value: ratingLabels[rating] },
+    words ? { label: "Words", value: words } : null,
+  ].filter((item): item is MetadataItem => item !== null);
 }
 
 async function getHeroImages({
@@ -154,6 +169,73 @@ async function getHeroImages({
   }
 }
 
+async function getMovieKeywords(tmdbId: number | null | undefined) {
+  const apiKey = process.env.TMDB_API_KEY;
+
+  if (!apiKey || !tmdbId) {
+    return [];
+  }
+
+  const url = new URL(`https://api.themoviedb.org/3/movie/${tmdbId}/keywords`);
+  const headers = new Headers();
+
+  if (isBearerToken(apiKey)) {
+    headers.set("Authorization", `Bearer ${apiKey}`);
+  } else {
+    url.searchParams.set("api_key", apiKey);
+  }
+
+  try {
+    const response = await fetch(url, { cache: "no-store", headers });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = (await response.json()) as {
+      keywords?: TmdbKeywordResult[];
+    };
+    const keywords = Array.isArray(data.keywords) ? data.keywords : [];
+    const seenKeywords = new Set<string>();
+
+    // TODO: Replace these with IMDb plot keywords sorted by helpful ratings if a reliable data source becomes available.
+    return keywords
+      .map((keyword) => keyword.name?.trim())
+      .filter((name): name is string => Boolean(name))
+      .filter((name) => {
+        const key = name.toLocaleLowerCase();
+
+        if (seenKeywords.has(key)) {
+          return false;
+        }
+
+        seenKeywords.add(key);
+        return true;
+      })
+      .slice(0, MOVIE_KEYWORD_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+async function getWatchedEntry(id: string) {
+  const result = await supabase
+    .from("watched_entries")
+    .select(WATCHED_ENTRY_SELECT_WITH_WORDS)
+    .eq("id", id)
+    .maybeSingle<WatchedEntryRow>();
+
+  if (!result.error || !isMissingWordsColumnError(result.error)) {
+    return result;
+  }
+
+  return supabase
+    .from("watched_entries")
+    .select(WATCHED_ENTRY_SELECT)
+    .eq("id", id)
+    .maybeSingle<WatchedEntryRow>();
+}
+
 export default async function WatchedEntryPage({
   params,
 }: {
@@ -165,13 +247,7 @@ export default async function WatchedEntryPage({
     notFound();
   }
 
-  const { data, error } = await supabase
-    .from("watched_entries")
-    .select(
-      "id, watched_date, platform, rating, movies(id, tmdb_id, title, poster_url, release_year)"
-    )
-    .eq("id", id)
-    .maybeSingle<WatchedEntryRow>();
+  const { data, error } = await getWatchedEntry(id);
 
   if (error) {
     console.error("Supabase error fetching watched entry:", error);
@@ -188,12 +264,21 @@ export default async function WatchedEntryPage({
   const watchedDate = data.watched_date?.trim() ? data.watched_date : null;
   const platform = data.platform?.trim() ? data.platform : null;
   const rating = getMovieRating(data.rating);
-  const watchedMetadata = getWatchedMetadata({ watchedDate, platform });
-  const heroImages = await getHeroImages({
-    tmdbId: movie?.tmdb_id,
-    fallbackImage: poster,
-    title,
+  const words = data.words?.trim() ? data.words : null;
+  const watchedMetadata = getWatchedMetadata({
+    watchedDate,
+    platform,
+    rating,
+    words,
   });
+  const [heroImages, movieKeywords] = await Promise.all([
+    getHeroImages({
+      tmdbId: movie?.tmdb_id,
+      fallbackImage: poster,
+      title,
+    }),
+    getMovieKeywords(movie?.tmdb_id),
+  ]);
   const editMovie: WatchedEntryEditMovie = {
     watchedEntryId: data.id,
     title,
@@ -202,14 +287,15 @@ export default async function WatchedEntryPage({
     watchedDate,
     platform,
     rating,
+    words,
   };
 
   return (
-    <main className="min-h-dvh bg-white text-black">
-      <section className="relative aspect-video w-full overflow-hidden bg-black text-white">
+    <main className="mx-auto min-h-dvh w-full max-w-[480px] bg-white text-black">
+      <section className="grid aspect-video w-full overflow-hidden bg-black text-white">
         <HeroImageSlider images={heroImages} />
 
-        <div className="pointer-events-none relative z-20 mx-auto flex h-full w-full max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
+        <div className="pointer-events-none col-start-1 row-start-1 z-20 mx-auto flex h-full w-full max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
           <div className="flex items-center justify-between">
             <Link
               href="/"
@@ -229,6 +315,19 @@ export default async function WatchedEntryPage({
       <section className="mx-auto w-full max-w-[480px] px-6 pb-20 pt-12 sm:px-8">
         <h1 className="text-[48px] font-extrabold leading-[52px]">{title}</h1>
 
+        {movieKeywords.length > 0 ? (
+          <ul className="mt-6 flex flex-wrap gap-2">
+            {movieKeywords.map((keyword) => (
+              <li
+                key={keyword}
+                className="rounded-full bg-wrapper px-3 py-1 text-[13px] font-semibold leading-5 text-black/45"
+              >
+                {keyword}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
         <dl className="mt-9 space-y-4 text-[15px] leading-6">
           {watchedMetadata.map((item) => (
             <div
@@ -236,39 +335,12 @@ export default async function WatchedEntryPage({
               className="flex items-baseline justify-between gap-6"
             >
               <dt className="font-normal text-black/30">{item.label}</dt>
-              <dd className="font-bold text-black/70">{item.value}</dd>
+              <dd className="min-w-0 whitespace-pre-line text-right font-bold text-black/70">
+                {item.value}
+              </dd>
             </div>
           ))}
         </dl>
-
-        <div className="mt-12 flex items-center gap-3 text-black/55">
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-wrapper text-accent/80"
-            aria-hidden="true"
-          >
-            <MaterialIcon
-              name={ratingIcons[rating]}
-              className="h-[18px] w-[18px]"
-            />
-          </span>
-          <div>
-            <p className="text-[12px] font-normal uppercase tracking-[0.12em] text-black/35">
-              Personal rating
-            </p>
-            <p className="mt-1 text-[16px] font-semibold text-black/70">
-              {ratingLabels[rating]}
-            </p>
-          </div>
-        </div>
-
-        <section className="mt-16 border-t border-black/[0.06] pt-10">
-          <h2 className="text-[18px] font-extrabold leading-6">
-            Personal note
-          </h2>
-          <p className="mt-5 text-[16px] font-normal leading-8 text-black/50">
-            No note yet.
-          </p>
-        </section>
 
         <section className="mt-14 border-t border-black/[0.06] pt-10">
           <h2 className="text-[18px] font-extrabold leading-6">

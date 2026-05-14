@@ -10,6 +10,7 @@ type SaveWatchedEntryRequest = {
   watched_date?: unknown;
   platform?: unknown;
   rating?: unknown;
+  words?: unknown;
 };
 
 type MovieRecord = {
@@ -113,6 +114,7 @@ export async function POST(request: Request) {
       watched_date: getOptionalText(body.watched_date),
       platform: getOptionalText(body.platform),
       rating: getMovieRating(body.rating),
+      words: getOptionalText(body.words),
     })
     .select("id")
     .single<{ id: string }>();

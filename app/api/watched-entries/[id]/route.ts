@@ -6,6 +6,7 @@ type UpdateWatchedEntryRequest = {
   watched_date?: unknown;
   platform?: unknown;
   rating?: unknown;
+  words?: unknown;
 };
 
 const validRatings = new Set<MovieRating>(["liked", "neutral", "disliked"]);
@@ -42,6 +43,7 @@ export async function PATCH(
       watched_date: getOptionalText(body.watched_date),
       platform: getOptionalText(body.platform),
       rating: getMovieRating(body.rating),
+      words: getOptionalText(body.words),
     })
     .eq("id", id)
     // TODO: Restore user_id filtering when authentication is added back.

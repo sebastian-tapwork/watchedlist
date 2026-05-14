@@ -15,6 +15,7 @@ export type WatchedEntryEditMovie = {
   watchedDate: string | null;
   platform: string | null;
   rating: MovieRating;
+  words: string | null;
 };
 
 type SaveState = "idle" | "saving" | "deleting";
@@ -45,6 +46,7 @@ export function WatchedEntryEditSheet({
   const [watchedDate, setWatchedDate] = useState(movie.watchedDate ?? "");
   const [platform, setPlatform] = useState(movie.platform ?? "");
   const [rating, setRating] = useState<MovieRating>(movie.rating);
+  const [words, setWords] = useState(movie.words ?? "");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
   const closeTimeoutRef = useRef<number | null>(null);
@@ -101,6 +103,7 @@ export function WatchedEntryEditSheet({
             watched_date: watchedDate,
             platform,
             rating,
+            words,
           }),
         }
       );
@@ -270,6 +273,23 @@ export function WatchedEntryEditSheet({
                   ))}
                 </div>
               </fieldset>
+
+              <div>
+                <label
+                  className="mb-2 block text-[13px] font-extrabold text-black/55"
+                  htmlFor="edit-words"
+                >
+                  Words
+                </label>
+                <textarea
+                  id="edit-words"
+                  value={words}
+                  rows={3}
+                  className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                  placeholder="null"
+                  onChange={(event) => setWords(event.target.value)}
+                />
+              </div>
 
               {error ? (
                 <p

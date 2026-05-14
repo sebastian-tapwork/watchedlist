@@ -52,6 +52,7 @@ export function AddMovieSheet() {
   const [watchedDate, setWatchedDate] = useState(getTodayDate);
   const [platform, setPlatform] = useState("");
   const [rating, setRating] = useState<MovieRating>("neutral");
+  const [words, setWords] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const closeTimeoutRef = useRef<number | null>(null);
@@ -163,6 +164,7 @@ export function AddMovieSheet() {
     setWatchedDate(getTodayDate());
     setPlatform("");
     setRating("neutral");
+    setWords("");
     setSaveState("idle");
     setSaveError(null);
   }
@@ -183,6 +185,7 @@ export function AddMovieSheet() {
     setWatchedDate(getTodayDate());
     setPlatform("");
     setRating("neutral");
+    setWords("");
     setSaveError(null);
   }
 
@@ -230,6 +233,7 @@ export function AddMovieSheet() {
           watched_date: watchedDate,
           platform,
           rating,
+          words,
         }),
       });
 
@@ -398,6 +402,23 @@ export function AddMovieSheet() {
                         ))}
                       </div>
                     </fieldset>
+
+                    <div>
+                      <label
+                        className="mb-2 block text-[13px] font-extrabold text-black/55"
+                        htmlFor="words"
+                      >
+                        Words
+                      </label>
+                      <textarea
+                        id="words"
+                        value={words}
+                        rows={3}
+                        className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                        placeholder="null"
+                        onChange={(event) => setWords(event.target.value)}
+                      />
+                    </div>
 
                     {saveError ? (
                       <p
