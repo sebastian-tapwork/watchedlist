@@ -17,7 +17,6 @@ export const dynamic = "force-dynamic";
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TMDB_BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780";
-const HERO_IMAGE_LIMIT = 5;
 
 type MovieRow = {
   id: string;
@@ -147,7 +146,6 @@ async function getHeroImages({
         seenImageUrls.add(src);
         return true;
       })
-      .slice(0, HERO_IMAGE_LIMIT)
       .map((src) => ({ src, alt: `${title} image` }));
 
     return backdropImages.length > 0 ? backdropImages : fallbackImages;
@@ -208,21 +206,22 @@ export default async function WatchedEntryPage({
 
   return (
     <main className="min-h-dvh bg-white text-black">
-      <section className="relative h-[42dvh] min-h-[300px] w-full overflow-hidden bg-black text-white">
+      <section className="relative aspect-video w-full overflow-hidden bg-black text-white">
         <HeroImageSlider images={heroImages} />
-        <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.52)_55%,rgba(0,0,0,0.86))]" />
 
-        <div className="relative z-20 mx-auto flex h-full w-full max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
+        <div className="pointer-events-none relative z-20 mx-auto flex h-full w-full max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
           <div className="flex items-center justify-between">
             <Link
               href="/"
               aria-label="Back to history"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-black/55 backdrop-blur-md"
+              className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-black/55 backdrop-blur-md"
             >
               <MaterialIcon name="arrow_back" className="h-[18px] w-[18px]" />
             </Link>
 
-            <EditWatchedEntryAction movie={editMovie} />
+            <div className="pointer-events-auto">
+              <EditWatchedEntryAction movie={editMovie} />
+            </div>
           </div>
         </div>
       </section>

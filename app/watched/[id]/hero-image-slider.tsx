@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
 
 type HeroImage = {
@@ -10,17 +10,57 @@ type HeroImage = {
 
 export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const getSlideIndex = useCallback(
+    (element: HTMLDivElement) => {
+      const slideWidth = element.clientWidth;
+
+      if (slideWidth === 0) {
+        return activeIndex;
+      }
+
+      return Math.min(
+        images.length - 1,
+        Math.max(0, Math.round(element.scrollLeft / slideWidth))
+      );
+    },
+    [activeIndex, images.length]
+  );
+
+  const goToImage = useCallback(
+    (index: number) => {
+      const nextIndex = Math.min(images.length - 1, Math.max(0, index));
+      const slider = sliderRef.current;
+
+      setActiveIndex(nextIndex);
+
+      if (!slider) {
+        return;
+      }
+
+      slider.scrollTo({
+        left: slider.clientWidth * nextIndex,
+        behavior: "smooth",
+      });
+    },
+    [images.length]
+  );
 
   function updateActiveImage(element: HTMLDivElement) {
-    const slideWidth = element.clientWidth;
+    setActiveIndex(getSlideIndex(element));
+  }
 
-    if (slideWidth === 0) {
-      return;
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      goToImage(activeIndex - 1);
     }
 
-    setActiveIndex(
-      Math.min(images.length - 1, Math.round(element.scrollLeft / slideWidth))
-    );
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      goToImage(activeIndex + 1);
+    }
   }
 
   if (images.length === 0) {
@@ -30,28 +70,38 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   return (
     <>
       <div
-        className="absolute inset-0 flex snap-x snap-mandatory overflow-x-auto scroll-smooth"
+        ref={sliderRef}
+        aria-label="Movie images"
+        aria-roledescription="carousel"
+        className="absolute inset-0 z-0 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onScroll={(event) => updateActiveImage(event.currentTarget)}
+        onKeyDown={handleKeyDown}
+        role="region"
+        tabIndex={images.length > 1 ? 0 : -1}
       >
         {images.map((image, index) => (
           <div
             key={image.src}
-            className="relative h-full w-full shrink-0 snap-center"
+            className="relative h-full w-full shrink-0 snap-center snap-always"
           >
             <Image
               src={image.src}
               alt={image.alt}
               fill
-              priority={index === 0}
+              preload={index === 0}
               sizes="100vw"
-              className="scale-105 object-cover opacity-35"
+              draggable={false}
+              className="pointer-events-none scale-105 object-cover"
             />
           </div>
         ))}
       </div>
 
       {images.length > 1 ? (
-        <div className="absolute bottom-5 right-5 z-20 rounded-full bg-black/35 px-3 py-1 text-[12px] font-semibold leading-5 text-white/80 backdrop-blur-md">
+        <div
+          aria-live="polite"
+          className="absolute bottom-5 right-5 z-20 rounded-full bg-black/35 px-3 py-1 text-[12px] font-semibold leading-5 text-white/80 backdrop-blur-md"
+        >
           {activeIndex + 1} / {images.length}
         </div>
       ) : null}
