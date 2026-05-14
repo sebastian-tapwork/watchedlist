@@ -44,6 +44,7 @@ export async function PATCH(
       rating: getMovieRating(body.rating),
     })
     .eq("id", id)
+    // TODO: Restore user_id filtering when authentication is added back.
     .select("id")
     .maybeSingle<{ id: string }>();
 
@@ -67,6 +68,7 @@ export async function DELETE(
     .from("watched_entries")
     .delete()
     .eq("id", id)
+    // TODO: Restore user_id filtering when authentication is added back.
     .select("id")
     .maybeSingle<{ id: string }>();
 

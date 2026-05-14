@@ -109,6 +109,7 @@ export async function POST(request: Request) {
     .from("watched_entries")
     .insert({
       movie_id: movie.movieId,
+      // TODO: Restore user_id ownership when authentication is added back.
       watched_date: getOptionalText(body.watched_date),
       platform: getOptionalText(body.platform),
       rating: getMovieRating(body.rating),

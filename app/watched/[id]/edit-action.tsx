@@ -17,7 +17,7 @@ export function EditWatchedEntryAction({
     <>
       <button
         type="button"
-        className="rounded-full bg-white/80 px-4 py-2 text-[13px] font-extrabold text-black/65 shadow-[0_8px_24px_rgba(0,0,0,0.08)] backdrop-blur-md"
+        className="rounded-full bg-white/70 px-4 py-2 text-[13px] font-semibold text-black/55 backdrop-blur-md"
         onClick={() => setIsEditing(true)}
       >
         Edit

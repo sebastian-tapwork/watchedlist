@@ -57,17 +57,17 @@ export function TrailerSection({ tmdbId }: { tmdbId: number | null }) {
   )}?rel=0`;
 
   return (
-    <section className="mt-14 border-t border-black/[0.06] pt-8">
+    <section className="mt-16 border-t border-black/[0.06] pt-10">
       <div className="flex items-end justify-between gap-6">
         <div>
           <h2 className="text-[18px] font-extrabold leading-6">Trailer</h2>
-          <p className="mt-2 text-[14px] font-medium leading-5 text-black/45">
+          <p className="mt-3 text-[14px] font-normal leading-6 text-black/45">
             A small preview.
           </p>
         </div>
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-md bg-black">
+      <div className="mt-6 overflow-hidden rounded-md bg-black">
         {isPlaying ? (
           <iframe
             title={trailer.name}
@@ -95,7 +95,7 @@ export function TrailerSection({ tmdbId }: { tmdbId: number | null }) {
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black/80">
                 <MaterialIcon name="play_arrow" className="h-6 w-6" />
               </span>
-              <span className="text-left text-[14px] font-extrabold leading-5 text-white">
+              <span className="text-left text-[14px] font-semibold leading-5 text-white">
                 Watch trailer
               </span>
             </span>
