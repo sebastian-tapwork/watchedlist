@@ -68,12 +68,12 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   }
 
   return (
-    <div className="relative col-start-1 row-start-1 h-full w-full overflow-hidden">
+    <div className="relative col-start-1 row-start-1 h-full w-full min-w-0 overflow-hidden">
       <div
         ref={sliderRef}
         aria-label="Movie images"
         aria-roledescription="carousel"
-        className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex h-full w-full min-w-0 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onScroll={(event) => updateActiveImage(event.currentTarget)}
         onKeyDown={handleKeyDown}
         role="region"
@@ -82,7 +82,7 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
         {images.map((image, index) => (
           <div
             key={image.src}
-            className="relative h-full w-full shrink-0 snap-center snap-always"
+            className="relative h-full min-w-0 basis-full shrink-0 snap-center snap-always"
           >
             <Image
               src={image.src}
