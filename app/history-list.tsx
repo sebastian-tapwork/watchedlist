@@ -1,10 +1,7 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  MaterialIcon,
-  type MaterialIconName,
-} from "@/src/components/material-icon";
+import { Meh, ThumbsDown, ThumbsUp, type LucideIcon } from "lucide-react";
 
 type MovieRating = "liked" | "neutral" | "disliked";
 type MovieMetadataItem = {
@@ -23,16 +20,16 @@ export type HistoryMovie = {
   platform: string | null;
 };
 
-const ratingIcons: Record<MovieRating, MaterialIconName> = {
-  liked: "thumb_up",
-  neutral: "sentiment_neutral",
-  disliked: "thumb_down",
+const ratingIcons: Record<MovieRating, LucideIcon> = {
+  liked: ThumbsUp,
+  neutral: Meh,
+  disliked: ThumbsDown,
 };
 
 const ratingLabels: Record<MovieRating, string> = {
-  liked: "Liked",
-  neutral: "Okay",
-  disliked: "Disliked",
+  liked: "Great",
+  neutral: "Mediocre",
+  disliked: "Crap",
 };
 
 function MovieListItem({
@@ -42,15 +39,16 @@ function MovieListItem({
   movie: HistoryMovie;
   index: number;
 }) {
+  const RatingIcon = ratingIcons[movie.rating];
   const content = (
     <>
-      <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
+      <div className="relative h-24 w-16 overflow-hidden rounded-sm bg-wrapper">
         {movie.poster ? (
           <Image
             src={movie.poster}
             alt={`${movie.title} poster`}
             fill
-            sizes="60px"
+            sizes="64px"
             loading={index < 3 ? "eager" : "lazy"}
             className="object-cover"
           />
@@ -75,13 +73,10 @@ function MovieListItem({
 
           <span
             aria-label={ratingLabels[movie.rating]}
-            className="flex h-5 w-5 shrink-0 items-center justify-center text-black/45"
+            className="flex h-6 w-6 shrink-0 items-center justify-center text-black/55"
             role="img"
           >
-            <MaterialIcon
-              name={ratingIcons[movie.rating]}
-              className="h-[17px] w-[17px]"
-            />
+            <RatingIcon aria-hidden="true" size={20} strokeWidth={2} />
           </span>
         </div>
       </div>
@@ -92,13 +87,13 @@ function MovieListItem({
     <article>
       {movie.watchedEntryId ? (
         <Link
-          className="grid touch-manipulation grid-cols-[60px_minmax(0,1fr)] items-center gap-4 text-left"
+          className="grid touch-manipulation grid-cols-[64px_minmax(0,1fr)] items-center gap-4 text-left"
           href={`/watched/${movie.watchedEntryId}`}
         >
           {content}
         </Link>
       ) : (
-        <div className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
+        <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-4">
           {content}
         </div>
       )}
