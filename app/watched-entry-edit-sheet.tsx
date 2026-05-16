@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
+import { RatingSelector, type MovieRating } from "./rating-selector";
 
-export type MovieRating = "liked" | "neutral" | "disliked";
+export type { MovieRating };
 
 export type WatchedEntryEditMovie = {
   watchedEntryId: string;
@@ -21,12 +22,6 @@ export type WatchedEntryEditMovie = {
 type SaveState = "idle" | "saving" | "deleting";
 
 const EDIT_SHEET_TRANSITION_MS = 320;
-
-const ratingOptions: { value: MovieRating; label: string }[] = [
-  { value: "liked", label: "Liked" },
-  { value: "neutral", label: "Okay" },
-  { value: "disliked", label: "Disliked" },
-];
 
 function getReleaseYearLabel(releaseYear: number | null) {
   return releaseYear === null ? "null" : String(releaseYear);
@@ -251,28 +246,7 @@ export function WatchedEntryEditSheet({
                 />
               </div>
 
-              <fieldset>
-                <legend className="mb-2 block text-[13px] font-extrabold text-black/55">
-                  Rating
-                </legend>
-                <div className="grid grid-cols-3 gap-1 rounded-md bg-wrapper p-1">
-                  {ratingOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      aria-pressed={rating === option.value}
-                      className={`h-10 rounded-sm text-[14px] font-extrabold ${
-                        rating === option.value
-                          ? "bg-white text-accent shadow-[0_1px_6px_rgba(0,0,0,0.08)]"
-                          : "text-black/45"
-                      }`}
-                      onClick={() => setRating(option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
+              <RatingSelector value={rating} onChange={setRating} />
 
               <div>
                 <label

@@ -313,14 +313,14 @@ export default async function WatchedEntryPage({
       </section>
 
       <section className="mx-auto w-full max-w-[480px] px-6 pb-20 pt-12 sm:px-8">
-        <h1 className="text-[48px] font-extrabold leading-[52px]">{title}</h1>
+        <h1 className="text-4xl font-extrabold leading-tight">{title}</h1>
 
         {movieKeywords.length > 0 ? (
           <ul className="mt-6 flex flex-wrap gap-2">
             {movieKeywords.map((keyword) => (
               <li
                 key={keyword}
-                className="rounded-full bg-wrapper px-3 py-1 text-[13px] font-semibold leading-5 text-black/45"
+                className="flex h-6 items-center rounded-[2px] bg-[#27272a] px-2 text-sm font-medium leading-none text-white"
               >
                 {keyword}
               </li>
@@ -328,34 +328,34 @@ export default async function WatchedEntryPage({
           </ul>
         ) : null}
 
-        <dl className="mt-9 space-y-4 text-[15px] leading-6">
+        <dl className="mt-4 space-y-4 text-[15px] leading-6">
           {watchedMetadata.map((item) => (
             <div
               key={item.label}
-              className="flex items-baseline justify-between gap-6"
+              className="grid grid-cols-[30%_minmax(0,70%)] items-start"
             >
-              <dt className="font-normal text-black/30">{item.label}</dt>
-              <dd className="min-w-0 whitespace-pre-line text-right font-bold text-black/70">
+              <dt className="pr-3 font-normal text-black/30">{item.label}</dt>
+              <dd className="min-w-0 whitespace-pre-line text-left font-semibold text-black/75">
                 {item.value}
               </dd>
             </div>
           ))}
         </dl>
 
-        <section className="mt-14 border-t border-black/[0.06] pt-10">
+        <section className="mt-4 border-t border-black/[0.06] pt-4">
           <h2 className="text-[18px] font-extrabold leading-6">
             Friends who liked it
           </h2>
-          <p className="mt-5 text-[16px] font-normal leading-8 text-black/50">
+          <p className="mt-4 text-[16px] font-normal leading-8 text-black/50">
             Friends will appear here later.
           </p>
         </section>
 
-        <section className="mt-14 border-t border-black/[0.06] pt-10">
+        <section className="mt-4 border-t border-black/[0.06] pt-4">
           <h2 className="text-[18px] font-extrabold leading-6">
             Movie information
           </h2>
-          <dl className="mt-6 space-y-4 text-[15px] leading-6">
+          <dl className="mt-4 space-y-4 text-[15px] leading-6">
             <div className="flex items-center justify-between gap-6">
               <dt className="font-normal text-black/30">Release year</dt>
               <dd className="font-bold text-black/70">
