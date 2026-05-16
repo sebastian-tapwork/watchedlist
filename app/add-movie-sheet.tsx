@@ -44,7 +44,7 @@ export function AddMovieSheet() {
   );
   const [watchedDate, setWatchedDate] = useState(getTodayDate);
   const [platform, setPlatform] = useState("");
-  const [rating, setRating] = useState<MovieRating>("neutral");
+  const [rating, setRating] = useState<MovieRating>("liked");
   const [words, setWords] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -156,7 +156,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("neutral");
+    setRating("liked");
     setWords("");
     setSaveState("idle");
     setSaveError(null);
@@ -177,7 +177,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("neutral");
+    setRating("liked");
     setWords("");
     setSaveError(null);
   }

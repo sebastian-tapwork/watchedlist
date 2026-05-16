@@ -46,7 +46,7 @@ export function RatingSelector({
 
   return (
     <fieldset>
-      <legend className="mb-2 block text-[13px] font-extrabold text-black/55">
+      <legend className="mb-2 block text-sm font-extrabold text-black/55">
         Rating
       </legend>
       <div className="grid grid-cols-4 gap-1 rounded-md bg-wrapper p-1">
@@ -58,7 +58,7 @@ export function RatingSelector({
               key={id}
               type="button"
               aria-pressed={isSelected}
-              className={`flex h-[88px] flex-col items-center justify-center gap-2 rounded-sm text-[13px] font-semibold transition-colors ${
+              className={`flex h-14 flex-col items-center justify-center gap-1 rounded-sm text-sm font-semibold leading-none transition-colors ${
                 isSelected
                   ? "bg-white text-accent shadow-[0_1px_6px_rgba(0,0,0,0.08)]"
                   : "text-black/35"
@@ -68,7 +68,7 @@ export function RatingSelector({
                 onChange(optionValue);
               }}
             >
-              <Icon aria-hidden="true" size={30} strokeWidth={2} />
+              <Icon aria-hidden="true" size={20} strokeWidth={2} />
               <span>{label}</span>
             </button>
           );
