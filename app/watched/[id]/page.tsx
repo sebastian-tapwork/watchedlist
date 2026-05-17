@@ -281,11 +281,9 @@ export default async function WatchedEntryPage({
   };
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-[480px] overflow-x-hidden bg-white text-black">
-      <section className="grid aspect-video w-full min-w-0 overflow-hidden bg-black text-white">
-        <HeroImageSlider images={heroImages} />
-
-        <div className="pointer-events-none col-start-1 row-start-1 z-20 mx-auto flex h-full w-full min-w-0 max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
+    <>
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 w-full overflow-x-hidden">
+        <div className="mx-auto w-full max-w-[480px] px-6 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
           <div className="flex min-w-0 items-center justify-between">
             <Link
               href="/"
@@ -300,9 +298,14 @@ export default async function WatchedEntryPage({
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="mx-auto w-full min-w-0 max-w-[480px] overflow-x-hidden px-6 pb-20 pt-12 sm:px-8">
+      <main className="mx-auto min-h-dvh w-full max-w-[480px] overflow-x-hidden bg-white text-black">
+        <section className="grid aspect-video w-full min-w-0 overflow-hidden bg-black text-white">
+          <HeroImageSlider images={heroImages} />
+        </section>
+
+        <section className="mx-auto w-full min-w-0 max-w-[480px] overflow-x-hidden px-6 pb-20 pt-12 sm:px-8">
         <h1 className="break-words text-4xl font-extrabold leading-tight">
           {title}
         </h1>
@@ -360,7 +363,8 @@ export default async function WatchedEntryPage({
             </div>
           </dl>
         </section>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }

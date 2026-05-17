@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import Image from "next/image";
 
 type HeroImage = {
@@ -10,45 +17,98 @@ type HeroImage = {
 
 export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [slideWidth, setSlideWidth] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef(0);
+  const pointerIdRef = useRef<number | null>(null);
 
-  const getSlideIndex = useCallback(
-    (element: HTMLDivElement) => {
-      const slideWidth = element.clientWidth;
+  useEffect(() => {
+    const slider = sliderRef.current;
 
-      if (slideWidth === 0) {
-        return activeIndex;
-      }
+    if (!slider) {
+      return;
+    }
 
-      return Math.min(
-        images.length - 1,
-        Math.max(0, Math.round(element.scrollLeft / slideWidth))
-      );
-    },
-    [activeIndex, images.length]
-  );
+    function updateSlideWidth() {
+      setSlideWidth(slider?.clientWidth ?? 0);
+    }
+
+    updateSlideWidth();
+
+    const resizeObserver = new ResizeObserver(updateSlideWidth);
+    resizeObserver.observe(slider);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const goToImage = useCallback(
     (index: number) => {
       const nextIndex = Math.min(images.length - 1, Math.max(0, index));
-      const slider = sliderRef.current;
 
       setActiveIndex(nextIndex);
-
-      if (!slider) {
-        return;
-      }
-
-      slider.scrollTo({
-        left: slider.clientWidth * nextIndex,
-        behavior: "smooth",
-      });
+      setDragOffset(0);
     },
     [images.length]
   );
 
-  function updateActiveImage(element: HTMLDivElement) {
-    setActiveIndex(getSlideIndex(element));
+  function getConstrainedDragOffset(deltaX: number) {
+    const isPullingBeforeFirst = activeIndex === 0 && deltaX > 0;
+    const isPullingPastLast = activeIndex === images.length - 1 && deltaX < 0;
+
+    return isPullingBeforeFirst || isPullingPastLast ? deltaX * 0.35 : deltaX;
+  }
+
+  function finishDrag(deltaX: number) {
+    const threshold = Math.min(80, Math.max(36, slideWidth * 0.2));
+
+    setIsDragging(false);
+    setDragOffset(0);
+    pointerIdRef.current = null;
+
+    if (deltaX <= -threshold) {
+      goToImage(activeIndex + 1);
+      return;
+    }
+
+    if (deltaX >= threshold) {
+      goToImage(activeIndex - 1);
+    }
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (!event.isPrimary || images.length < 2) {
+      return;
+    }
+
+    pointerIdRef.current = event.pointerId;
+    startXRef.current = event.clientX;
+    setIsDragging(true);
+    setDragOffset(0);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!isDragging || pointerIdRef.current !== event.pointerId) {
+      return;
+    }
+
+    setDragOffset(getConstrainedDragOffset(event.clientX - startXRef.current));
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    if (pointerIdRef.current !== event.pointerId) {
+      return;
+    }
+
+    finishDrag(event.clientX - startXRef.current);
+  }
+
+  function handlePointerCancel() {
+    setIsDragging(false);
+    setDragOffset(0);
+    pointerIdRef.current = null;
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -67,34 +127,50 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
     return null;
   }
 
+  const trackOffset = dragOffset - activeIndex * slideWidth;
+
   return (
-    <div className="relative col-start-1 row-start-1 h-full w-full min-w-0 overflow-hidden">
+    <div className="relative col-start-1 row-start-1 h-full w-full max-w-full min-w-0 overflow-hidden">
       <div
         ref={sliderRef}
         aria-label="Movie images"
         aria-roledescription="carousel"
-        className="flex h-full w-full min-w-0 touch-pan-x snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        onScroll={(event) => updateActiveImage(event.currentTarget)}
+        className="h-full w-full max-w-full min-w-0 touch-pan-y overflow-hidden"
         onKeyDown={handleKeyDown}
+        onPointerCancel={handlePointerCancel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
         role="region"
         tabIndex={images.length > 1 ? 0 : -1}
       >
-        {images.map((image, index) => (
-          <div
-            key={image.src}
-            className="relative h-full min-w-0 basis-full shrink-0 snap-center snap-always"
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              preload={index === 0}
-              sizes="100vw"
-              draggable={false}
-              className="pointer-events-none scale-105 object-cover"
-            />
-          </div>
-        ))}
+        <div
+          className="flex h-full will-change-transform"
+          style={{
+            transform: `translate3d(${trackOffset}px, 0, 0)`,
+            transition: isDragging
+              ? "none"
+              : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          {images.map((image, index) => (
+            <div
+              key={image.src}
+              className="relative h-full w-full shrink-0"
+              style={{ width: slideWidth || "100%" }}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                preload={index === 0}
+                sizes="(max-width: 480px) 100vw, 480px"
+                draggable={false}
+                className="pointer-events-none select-none scale-105 object-cover"
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {images.length > 1 ? (
