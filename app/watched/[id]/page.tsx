@@ -281,12 +281,12 @@ export default async function WatchedEntryPage({
   };
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-[480px] bg-white text-black">
-      <section className="grid aspect-video w-full overflow-hidden bg-black text-white">
+    <main className="mx-auto min-h-dvh w-full max-w-[480px] overflow-x-hidden bg-white text-black">
+      <section className="grid aspect-video w-full min-w-0 overflow-hidden bg-black text-white">
         <HeroImageSlider images={heroImages} />
 
-        <div className="pointer-events-none col-start-1 row-start-1 z-20 mx-auto flex h-full w-full max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
-          <div className="flex items-center justify-between">
+        <div className="pointer-events-none col-start-1 row-start-1 z-20 mx-auto flex h-full w-full min-w-0 max-w-[480px] flex-col px-6 pb-8 pt-[max(18px,env(safe-area-inset-top))] sm:px-8">
+          <div className="flex min-w-0 items-center justify-between">
             <Link
               href="/"
               aria-label="Back to history"
@@ -302,15 +302,17 @@ export default async function WatchedEntryPage({
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-[480px] px-6 pb-20 pt-12 sm:px-8">
-        <h1 className="text-4xl font-extrabold leading-tight">{title}</h1>
+      <section className="mx-auto w-full min-w-0 max-w-[480px] overflow-x-hidden px-6 pb-20 pt-12 sm:px-8">
+        <h1 className="break-words text-4xl font-extrabold leading-tight">
+          {title}
+        </h1>
 
         {movieKeywords.length > 0 ? (
-          <ul className="mt-6 flex flex-wrap gap-2">
+          <ul className="mt-6 flex min-w-0 flex-wrap gap-2">
             {movieKeywords.map((keyword) => (
               <li
                 key={keyword}
-                className="flex h-6 items-center rounded-[2px] bg-[#27272a] px-2 text-sm font-medium leading-none text-white"
+                className="flex h-6 max-w-full items-center overflow-hidden truncate rounded-[2px] bg-[#27272a] px-2 text-sm font-medium leading-none text-white"
               >
                 {keyword}
               </li>
@@ -322,10 +324,12 @@ export default async function WatchedEntryPage({
           {watchedMetadata.map((item) => (
             <div
               key={item.label}
-              className="grid grid-cols-[30%_minmax(0,70%)] items-start"
+              className="grid min-w-0 grid-cols-[30%_minmax(0,70%)] items-start"
             >
-              <dt className="pr-3 font-normal text-black/30">{item.label}</dt>
-              <dd className="min-w-0 whitespace-pre-line text-left font-semibold text-black/75">
+              <dt className="min-w-0 pr-3 font-normal text-black/30">
+                {item.label}
+              </dt>
+              <dd className="min-w-0 break-words whitespace-pre-line text-left font-semibold text-black/75">
                 {item.value}
               </dd>
             </div>
@@ -336,7 +340,7 @@ export default async function WatchedEntryPage({
           <h2 className="text-[18px] font-extrabold leading-6">
             Friends who liked it
           </h2>
-          <p className="mt-4 text-[16px] font-normal leading-8 text-black/50">
+          <p className="mt-4 break-words text-[16px] font-normal leading-8 text-black/50">
             Friends will appear here later.
           </p>
         </section>
@@ -346,9 +350,11 @@ export default async function WatchedEntryPage({
             Movie information
           </h2>
           <dl className="mt-4 space-y-4 text-[15px] leading-6">
-            <div className="flex items-center justify-between gap-6">
-              <dt className="font-normal text-black/30">Release year</dt>
-              <dd className="font-bold text-black/70">
+            <div className="flex min-w-0 items-center justify-between gap-6">
+              <dt className="min-w-0 font-normal text-black/30">
+                Release year
+              </dt>
+              <dd className="min-w-0 break-words text-right font-bold text-black/70">
                 {getDisplayValue(movie?.release_year)}
               </dd>
             </div>
