@@ -3,10 +3,10 @@ import { MaterialIcon } from "@/src/components/material-icon";
 import { supabase } from "../src/lib/supabase";
 import { AddMovieSheet } from "./add-movie-sheet";
 import { HistoryList, type HistoryMovie } from "./history-list";
+import { DEFAULT_MOVIE_RATING, getMovieRating } from "./movie-ratings";
 
 export const dynamic = "force-dynamic";
 
-type MovieRating = "liked" | "neutral" | "disliked";
 type MovieMetadataItem = {
   label: string;
   value: string;
@@ -58,12 +58,6 @@ function getEntryMovie(movie: WatchedEntryRow["movies"]) {
   }
 
   return movie;
-}
-
-function getMovieRating(value: string | null): MovieRating {
-  return value === "liked" || value === "disliked" || value === "neutral"
-    ? value
-    : "neutral";
 }
 
 export default async function Home() {
@@ -125,7 +119,7 @@ export default async function Home() {
       watchedEntryId: null,
       title: movie.title ?? "Untitled",
       metadata: getMovieMetadata({}),
-      rating: "neutral",
+      rating: DEFAULT_MOVIE_RATING,
       poster: getMetadataValue(movie.poster_url),
       watchedDate: null,
       platform: null,

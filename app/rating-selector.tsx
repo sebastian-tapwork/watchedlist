@@ -2,8 +2,13 @@
 
 import { Heart, Meh, ThumbsDown, ThumbsUp, type LucideIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  getMovieRating,
+  movieRatingLabels,
+  type MovieRating,
+} from "./movie-ratings";
 
-export type MovieRating = "liked" | "neutral" | "disliked";
+export type { MovieRating };
 
 type RatingOptionId = "crap" | "mediocre" | "great" | "awesome";
 
@@ -15,22 +20,34 @@ type RatingOption = {
 };
 
 const ratingOptions: RatingOption[] = [
-  { id: "crap", label: "Crap", value: "disliked", Icon: ThumbsDown },
-  { id: "mediocre", label: "Mediocre", value: "neutral", Icon: Meh },
-  { id: "great", label: "Great", value: "liked", Icon: ThumbsUp },
-  { id: "awesome", label: "Awesome", value: "liked", Icon: Heart },
+  {
+    id: "crap",
+    label: movieRatingLabels.crap,
+    value: "crap",
+    Icon: ThumbsDown,
+  },
+  {
+    id: "mediocre",
+    label: movieRatingLabels.mediocre,
+    value: "mediocre",
+    Icon: Meh,
+  },
+  {
+    id: "great",
+    label: movieRatingLabels.great,
+    value: "great",
+    Icon: ThumbsUp,
+  },
+  {
+    id: "awesome",
+    label: movieRatingLabels.awesome,
+    value: "awesome",
+    Icon: Heart,
+  },
 ];
 
 function getDefaultOptionId(value: MovieRating): RatingOptionId {
-  if (value === "disliked") {
-    return "crap";
-  }
-
-  if (value === "neutral") {
-    return "mediocre";
-  }
-
-  return "great";
+  return getMovieRating(value);
 }
 
 export function RatingSelector({

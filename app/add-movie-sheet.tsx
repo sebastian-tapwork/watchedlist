@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
-import { RatingSelector, type MovieRating } from "./rating-selector";
+import { DEFAULT_MOVIE_RATING, type MovieRating } from "./movie-ratings";
+import { RatingSelector } from "./rating-selector";
 
 type MovieSearchResult = {
   tmdb_id: number;
@@ -44,7 +45,7 @@ export function AddMovieSheet() {
   );
   const [watchedDate, setWatchedDate] = useState(getTodayDate);
   const [platform, setPlatform] = useState("");
-  const [rating, setRating] = useState<MovieRating>("liked");
+  const [rating, setRating] = useState<MovieRating>(DEFAULT_MOVIE_RATING);
   const [words, setWords] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("liked");
+    setRating(DEFAULT_MOVIE_RATING);
     setWords("");
     setSaveState("idle");
     setSaveError(null);
@@ -177,7 +178,7 @@ export function AddMovieSheet() {
     setSelectedMovie(null);
     setWatchedDate(getTodayDate());
     setPlatform("");
-    setRating("liked");
+    setRating(DEFAULT_MOVIE_RATING);
     setWords("");
     setSaveError(null);
   }
@@ -368,7 +369,7 @@ export function AddMovieSheet() {
                         type="text"
                         value={platform}
                         className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
-                        placeholder="null"
+                        placeholder="Cinema, Netflix, Apple TV"
                         onChange={(event) => setPlatform(event.target.value)}
                       />
                     </div>
@@ -387,7 +388,7 @@ export function AddMovieSheet() {
                         value={words}
                         rows={3}
                         className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
-                        placeholder="null"
+                        placeholder="Why did you like it?"
                         onChange={(event) => setWords(event.target.value)}
                       />
                     </div>

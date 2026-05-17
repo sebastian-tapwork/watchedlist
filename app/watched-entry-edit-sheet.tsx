@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
-import { RatingSelector, type MovieRating } from "./rating-selector";
+import { type MovieRating } from "./movie-ratings";
+import { RatingSelector } from "./rating-selector";
 
 export type { MovieRating };
 
@@ -241,7 +242,7 @@ export function WatchedEntryEditSheet({
                   type="text"
                   value={platform}
                   className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
-                  placeholder="null"
+                  placeholder="Cinema, Netflix, Apple TV"
                   onChange={(event) => setPlatform(event.target.value)}
                 />
               </div>
@@ -260,7 +261,7 @@ export function WatchedEntryEditSheet({
                   value={words}
                   rows={3}
                   className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
-                  placeholder="null"
+                  placeholder="Why did you like it?"
                   onChange={(event) => setWords(event.target.value)}
                 />
               </div>

@@ -1,6 +1,5 @@
 import { supabase } from "@/src/lib/supabase";
-
-type MovieRating = "liked" | "neutral" | "disliked";
+import { getMovieRating } from "@/app/movie-ratings";
 
 type UpdateWatchedEntryRequest = {
   watched_date?: unknown;
@@ -8,8 +7,6 @@ type UpdateWatchedEntryRequest = {
   rating?: unknown;
   words?: unknown;
 };
-
-const validRatings = new Set<MovieRating>(["liked", "neutral", "disliked"]);
 
 function getOptionalText(value: unknown) {
   if (typeof value !== "string") {
@@ -19,16 +16,6 @@ function getOptionalText(value: unknown) {
   const trimmedValue = value.trim();
 
   return trimmedValue ? trimmedValue : null;
-}
-
-function getMovieRating(value: unknown): MovieRating {
-  if (value === "okay") {
-    return "neutral";
-  }
-
-  return typeof value === "string" && validRatings.has(value as MovieRating)
-    ? (value as MovieRating)
-    : "neutral";
 }
 
 export async function PATCH(

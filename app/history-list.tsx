@@ -1,9 +1,9 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Meh, ThumbsDown, ThumbsUp, type LucideIcon } from "lucide-react";
+import { Heart, Meh, ThumbsDown, ThumbsUp, type LucideIcon } from "lucide-react";
+import { movieRatingLabels, type MovieRating } from "./movie-ratings";
 
-type MovieRating = "liked" | "neutral" | "disliked";
 type MovieMetadataItem = {
   label: string;
   value: string;
@@ -21,15 +21,10 @@ export type HistoryMovie = {
 };
 
 const ratingIcons: Record<MovieRating, LucideIcon> = {
-  liked: ThumbsUp,
-  neutral: Meh,
-  disliked: ThumbsDown,
-};
-
-const ratingLabels: Record<MovieRating, string> = {
-  liked: "Great",
-  neutral: "Mediocre",
-  disliked: "Crap",
+  crap: ThumbsDown,
+  mediocre: Meh,
+  great: ThumbsUp,
+  awesome: Heart,
 };
 
 function MovieListItem({
@@ -72,7 +67,7 @@ function MovieListItem({
           </dl>
 
           <span
-            aria-label={ratingLabels[movie.rating]}
+            aria-label={movieRatingLabels[movie.rating]}
             className="flex h-6 w-6 shrink-0 items-center justify-center text-black/55"
             role="img"
           >

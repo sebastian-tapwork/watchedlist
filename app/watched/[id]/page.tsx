@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MaterialIcon } from "@/src/components/material-icon";
 import { supabase } from "@/src/lib/supabase";
+import {
+  getMovieRating,
+  movieRatingLabels,
+  type MovieRating,
+} from "@/app/movie-ratings";
 import { EditWatchedEntryAction } from "./edit-action";
 import { HeroImageSlider } from "./hero-image-slider";
-import type {
-  MovieRating,
-  WatchedEntryEditMovie,
-} from "../../watched-entry-edit-sheet";
+import type { WatchedEntryEditMovie } from "../../watched-entry-edit-sheet";
 
 export const dynamic = "force-dynamic";
 
@@ -66,18 +68,6 @@ function getDisplayValue(value: string | number | null | undefined) {
   return value?.trim() ? value : "null";
 }
 
-function getMovieRating(value: string | null): MovieRating {
-  return value === "liked" || value === "disliked" || value === "neutral"
-    ? value
-    : "neutral";
-}
-
-const ratingLabels: Record<MovieRating, string> = {
-  liked: "Liked",
-  neutral: "Okay",
-  disliked: "Disliked",
-};
-
 function isBearerToken(apiKey: string) {
   return apiKey.split(".").length === 3;
 }
@@ -106,7 +96,7 @@ function getWatchedMetadata({
   return [
     watchedDate ? { label: "Watched", value: watchedDate } : null,
     platform ? { label: "Where", value: platform } : null,
-    { label: "Rating", value: ratingLabels[rating] },
+    { label: "Rating", value: movieRatingLabels[rating] },
     words ? { label: "Words", value: words } : null,
   ].filter((item): item is MetadataItem => item !== null);
 }
