@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import {
   WatchedEntryEditSheet,
   type WatchedEntryEditMovie,
@@ -12,6 +13,7 @@ export function EditWatchedEntryAction({
   movie: WatchedEntryEditMovie;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const portalRoot = typeof document === "undefined" ? null : document.body;
 
   return (
     <>
@@ -23,12 +25,15 @@ export function EditWatchedEntryAction({
         Edit
       </button>
 
-      {isEditing ? (
-        <WatchedEntryEditSheet
-          movie={movie}
-          onClose={() => setIsEditing(false)}
-        />
-      ) : null}
+      {isEditing && portalRoot
+        ? createPortal(
+            <WatchedEntryEditSheet
+              movie={movie}
+              onClose={() => setIsEditing(false)}
+            />,
+            portalRoot
+          )
+        : null}
     </>
   );
 }
