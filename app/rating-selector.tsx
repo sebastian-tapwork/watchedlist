@@ -62,7 +62,7 @@ export function RatingSelector({
   );
 
   return (
-    <fieldset className="min-w-0 max-w-full overflow-x-hidden">
+    <fieldset className="min-w-0 max-w-full overflow-x-hidden [min-inline-size:0]">
       <legend className="mb-2 block text-sm font-extrabold text-black/55">
         Rating
       </legend>
