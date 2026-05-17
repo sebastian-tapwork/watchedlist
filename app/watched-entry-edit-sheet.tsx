@@ -151,7 +151,7 @@ export function WatchedEntryEditSheet({
 
   return (
     <div
-      className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20"
+      className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/20"
       data-state={isVisible ? "open" : "closed"}
     >
       <button
@@ -164,13 +164,13 @@ export function WatchedEntryEditSheet({
       <section
         aria-labelledby="edit-entry-title"
         aria-modal="true"
-        className="sheet-panel relative z-10 flex w-full max-w-[480px] flex-col rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 text-black shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+        className="sheet-panel relative z-10 flex w-full max-w-full max-w-[480px] flex-col overflow-x-hidden rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 text-black shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
         data-state={isVisible ? "open" : "closed"}
         role="dialog"
       >
         <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
 
-        <div className="mt-5 flex h-9 items-center justify-between">
+        <div className="mt-5 flex h-9 min-w-0 items-center justify-between">
           <span className="h-9 w-9" aria-hidden="true" />
           <h2
             id="edit-entry-title"
@@ -188,9 +188,9 @@ export function WatchedEntryEditSheet({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto pb-2">
-          <form className="mt-6" onSubmit={saveEntry}>
-            <div className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-2">
+          <form className="mt-6 min-w-0" onSubmit={saveEntry}>
+            <div className="grid min-w-0 grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
               <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
                 {movie.poster ? (
                   <Image
@@ -213,8 +213,8 @@ export function WatchedEntryEditSheet({
               </div>
             </div>
 
-            <div className="mt-6 space-y-5">
-              <div>
+            <div className="mt-6 min-w-0 space-y-5">
+              <div className="min-w-0">
                 <label
                   className="mb-2 block text-[13px] font-extrabold text-black/55"
                   htmlFor="edit-watched-date"
@@ -225,12 +225,12 @@ export function WatchedEntryEditSheet({
                   id="edit-watched-date"
                   type="date"
                   value={watchedDate}
-                  className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold text-black outline-none focus:bg-wrapper-strong"
+                  className="h-12 w-full min-w-0 max-w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold text-black outline-none focus:bg-wrapper-strong"
                   onChange={(event) => setWatchedDate(event.target.value)}
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label
                   className="mb-2 block text-[13px] font-extrabold text-black/55"
                   htmlFor="edit-platform"
@@ -241,7 +241,7 @@ export function WatchedEntryEditSheet({
                   id="edit-platform"
                   type="text"
                   value={platform}
-                  className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                  className="h-12 w-full min-w-0 max-w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
                   placeholder="Cinema, Netflix, Apple TV"
                   onChange={(event) => setPlatform(event.target.value)}
                 />
@@ -249,7 +249,7 @@ export function WatchedEntryEditSheet({
 
               <RatingSelector value={rating} onChange={setRating} />
 
-              <div>
+              <div className="min-w-0">
                 <label
                   className="mb-2 block text-[13px] font-extrabold text-black/55"
                   htmlFor="edit-words"
@@ -260,7 +260,7 @@ export function WatchedEntryEditSheet({
                   id="edit-words"
                   value={words}
                   rows={3}
-                  className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                  className="min-h-24 w-full min-w-0 max-w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold text-black outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
                   placeholder="Why did you like it?"
                   onChange={(event) => setWords(event.target.value)}
                 />
@@ -275,10 +275,10 @@ export function WatchedEntryEditSheet({
                 </p>
               ) : null}
 
-              <div className="space-y-3 pt-1">
+              <div className="min-w-0 space-y-3 pt-1">
                 <button
                   type="submit"
-                  className="flex h-12 w-full items-center justify-center rounded-full bg-accent text-[15px] font-extrabold text-white disabled:bg-black/15"
+                  className="flex h-12 w-full min-w-0 items-center justify-center rounded-full bg-accent text-[15px] font-extrabold text-white disabled:bg-black/15"
                   disabled={saveState !== "idle"}
                 >
                   {saveState === "saving" ? "Saving" : "Save"}
@@ -286,7 +286,7 @@ export function WatchedEntryEditSheet({
 
                 <button
                   type="button"
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-wrapper text-[15px] font-extrabold text-red-600 disabled:text-black/25"
+                  className="flex h-12 w-full min-w-0 items-center justify-center gap-2 rounded-full bg-wrapper text-[15px] font-extrabold text-red-600 disabled:text-black/25"
                   disabled={saveState !== "idle"}
                   onClick={deleteEntry}
                 >

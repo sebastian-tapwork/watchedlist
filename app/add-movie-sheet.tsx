@@ -264,7 +264,7 @@ export function AddMovieSheet() {
 
       {isSheetMounted ? (
         <div
-          className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/20"
+          className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/20"
           data-state={isSheetVisible ? "open" : "closed"}
         >
           <button
@@ -277,13 +277,13 @@ export function AddMovieSheet() {
           <section
             aria-labelledby="add-movie-title"
             aria-modal="true"
-            className="sheet-panel relative z-10 flex w-full max-w-[480px] flex-col rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+            className="sheet-panel relative z-10 flex w-full max-w-full max-w-[480px] flex-col overflow-x-hidden rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
             data-state={isSheetVisible ? "open" : "closed"}
             role="dialog"
           >
             <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
 
-            <div className="mt-5 flex h-9 items-center justify-between">
+            <div className="mt-5 flex h-9 min-w-0 items-center justify-between">
               {selectedMovie ? (
                 <button
                   type="button"
@@ -314,10 +314,10 @@ export function AddMovieSheet() {
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-2">
               {selectedMovie ? (
-                <form className="mt-6" onSubmit={saveWatchedEntry}>
-                  <div className="grid grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
+                <form className="mt-6 min-w-0" onSubmit={saveWatchedEntry}>
+                  <div className="grid min-w-0 grid-cols-[60px_minmax(0,1fr)] items-center gap-4">
                     <div className="relative h-[90px] w-[60px] overflow-hidden rounded-sm bg-wrapper">
                       {selectedMovie.poster_url ? (
                         <Image
@@ -340,8 +340,8 @@ export function AddMovieSheet() {
                     </div>
                   </div>
 
-                  <div className="mt-6 space-y-5">
-                    <div>
+                  <div className="mt-6 min-w-0 space-y-5">
+                    <div className="min-w-0">
                       <label
                         className="mb-2 block text-[13px] font-extrabold text-black/55"
                         htmlFor="watched-date"
@@ -352,12 +352,12 @@ export function AddMovieSheet() {
                         id="watched-date"
                         type="date"
                         value={watchedDate}
-                        className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold outline-none focus:bg-wrapper-strong"
+                        className="h-12 w-full min-w-0 max-w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold outline-none focus:bg-wrapper-strong"
                         onChange={(event) => setWatchedDate(event.target.value)}
                       />
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <label
                         className="mb-2 block text-[13px] font-extrabold text-black/55"
                         htmlFor="platform"
@@ -368,7 +368,7 @@ export function AddMovieSheet() {
                         id="platform"
                         type="text"
                         value={platform}
-                        className="h-12 w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                        className="h-12 w-full min-w-0 max-w-full rounded-md bg-wrapper px-4 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
                         placeholder="Cinema, Netflix, Apple TV"
                         onChange={(event) => setPlatform(event.target.value)}
                       />
@@ -376,7 +376,7 @@ export function AddMovieSheet() {
 
                     <RatingSelector value={rating} onChange={setRating} />
 
-                    <div>
+                    <div className="min-w-0">
                       <label
                         className="mb-2 block text-[13px] font-extrabold text-black/55"
                         htmlFor="words"
@@ -387,7 +387,7 @@ export function AddMovieSheet() {
                         id="words"
                         value={words}
                         rows={3}
-                        className="min-h-24 w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
+                        className="min-h-24 w-full min-w-0 max-w-full resize-none rounded-md bg-wrapper px-4 py-3 text-[16px] font-semibold outline-none placeholder:text-black/30 focus:bg-wrapper-strong"
                         placeholder="Why did you like it?"
                         onChange={(event) => setWords(event.target.value)}
                       />
@@ -404,7 +404,7 @@ export function AddMovieSheet() {
 
                     <button
                       type="submit"
-                      className="flex h-12 w-full items-center justify-center rounded-full bg-accent text-[15px] font-extrabold text-white disabled:bg-black/15"
+                      className="flex h-12 w-full min-w-0 items-center justify-center rounded-full bg-accent text-[15px] font-extrabold text-white disabled:bg-black/15"
                       disabled={saveState === "saving"}
                     >
                       {saveState === "saving" ? "Saving" : "Save"}
@@ -413,7 +413,7 @@ export function AddMovieSheet() {
                 </form>
               ) : (
                 <>
-                  <div className="mt-6 flex h-12 items-center gap-3 rounded-full bg-wrapper px-4">
+                  <div className="mt-6 flex h-12 min-w-0 items-center gap-3 rounded-full bg-wrapper px-4">
                     <MaterialIcon
                       name="search"
                       className="h-5 w-5 shrink-0 text-black/35"
@@ -458,7 +458,7 @@ export function AddMovieSheet() {
                       <button
                         key={movie.tmdb_id}
                         type="button"
-                        className="grid w-full grid-cols-[44px_minmax(0,1fr)] items-center gap-3 rounded-md py-2 text-left"
+                        className="grid w-full min-w-0 grid-cols-[44px_minmax(0,1fr)] items-center gap-3 rounded-md py-2 text-left"
                         onClick={() => selectMovie(movie)}
                       >
                         <div className="relative h-[66px] w-[44px] overflow-hidden rounded-sm bg-wrapper">

@@ -62,11 +62,11 @@ export function RatingSelector({
   );
 
   return (
-    <fieldset>
+    <fieldset className="min-w-0 max-w-full overflow-x-hidden">
       <legend className="mb-2 block text-sm font-extrabold text-black/55">
         Rating
       </legend>
-      <div className="grid grid-cols-4 gap-1 rounded-md bg-wrapper p-1">
+      <div className="grid min-w-0 max-w-full grid-cols-4 gap-1 overflow-x-hidden rounded-md bg-wrapper p-1">
         {ratingOptions.map(({ id, label, value: optionValue, Icon }) => {
           const isSelected = activeOptionId === id;
 
@@ -75,7 +75,7 @@ export function RatingSelector({
               key={id}
               type="button"
               aria-pressed={isSelected}
-              className={`flex h-14 flex-col items-center justify-center gap-1 rounded-sm text-sm font-semibold leading-none transition-colors ${
+              className={`flex h-14 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-sm text-sm font-semibold leading-none transition-colors ${
                 isSelected
                   ? "bg-white text-accent shadow-[0_1px_6px_rgba(0,0,0,0.08)]"
                   : "text-black/35"
@@ -85,8 +85,13 @@ export function RatingSelector({
                 onChange(optionValue);
               }}
             >
-              <Icon aria-hidden="true" size={20} strokeWidth={2} />
-              <span>{label}</span>
+              <Icon
+                aria-hidden="true"
+                className="shrink-0"
+                size={20}
+                strokeWidth={2}
+              />
+              <span className="max-w-full truncate">{label}</span>
             </button>
           );
         })}
