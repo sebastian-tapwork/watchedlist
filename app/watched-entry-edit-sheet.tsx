@@ -164,7 +164,7 @@ export function WatchedEntryEditSheet({
       <section
         aria-labelledby="edit-entry-title"
         aria-modal="true"
-        className="sheet-panel relative z-10 flex w-full max-w-full max-w-[480px] flex-col overflow-x-hidden rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 text-black shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
+        className="sheet-panel relative z-10 mx-auto flex w-full max-w-[480px] flex-col overflow-x-hidden rounded-t-[28px] bg-white px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 text-black shadow-[0_-18px_60px_rgba(0,0,0,0.16)] sm:px-8"
         data-state={isVisible ? "open" : "closed"}
         role="dialog"
       >
