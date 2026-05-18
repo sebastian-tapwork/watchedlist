@@ -15,6 +15,8 @@ type HeroImage = {
   alt: string;
 };
 
+type SwipeGesture = "pending" | "horizontal" | "vertical";
+
 export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
@@ -22,7 +24,9 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
   const [slideWidth, setSlideWidth] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+  const gestureRef = useRef<SwipeGesture | null>(null);
 
   useEffect(() => {
     const slider = sliderRef.current;
@@ -66,6 +70,7 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
     setIsDragging(false);
     setDragOffset(0);
     pointerIdRef.current = null;
+    gestureRef.current = null;
 
     if (deltaX <= -threshold) {
       goToImage(activeIndex + 1);
@@ -83,18 +88,50 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
     }
 
     pointerIdRef.current = event.pointerId;
+    gestureRef.current = "pending";
     startXRef.current = event.clientX;
-    setIsDragging(true);
+    startYRef.current = event.clientY;
+    setIsDragging(false);
     setDragOffset(0);
-    event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (!isDragging || pointerIdRef.current !== event.pointerId) {
+    if (pointerIdRef.current !== event.pointerId || !gestureRef.current) {
       return;
     }
 
-    setDragOffset(getConstrainedDragOffset(event.clientX - startXRef.current));
+    const deltaX = event.clientX - startXRef.current;
+    const deltaY = event.clientY - startYRef.current;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (gestureRef.current === "pending") {
+      if (absX < 8 && absY < 8) {
+        return;
+      }
+
+      if (absY > absX) {
+        gestureRef.current = "vertical";
+        setIsDragging(false);
+        setDragOffset(0);
+        return;
+      }
+
+      if (absX < 10 || absX < absY * 1.35) {
+        return;
+      }
+
+      gestureRef.current = "horizontal";
+      setIsDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    if (gestureRef.current !== "horizontal") {
+      return;
+    }
+
+    event.preventDefault();
+    setDragOffset(getConstrainedDragOffset(deltaX));
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
@@ -102,13 +139,23 @@ export function HeroImageSlider({ images }: { images: HeroImage[] }) {
       return;
     }
 
-    finishDrag(event.clientX - startXRef.current);
+    if (gestureRef.current === "horizontal") {
+      event.preventDefault();
+      finishDrag(event.clientX - startXRef.current);
+      return;
+    }
+
+    setIsDragging(false);
+    setDragOffset(0);
+    pointerIdRef.current = null;
+    gestureRef.current = null;
   }
 
   function handlePointerCancel() {
     setIsDragging(false);
     setDragOffset(0);
     pointerIdRef.current = null;
+    gestureRef.current = null;
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
